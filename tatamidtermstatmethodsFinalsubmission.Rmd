@@ -1,0 +1,382 @@
+---
+title: "tatamidtermstatisticalmethods"
+author: "Abby Tata"
+date: "2023-07-31"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+```{r}
+library(Sleuth3)
+library(tidyverse)
+library(car)
+library (mosaic)
+library (ggthemes)
+library (gmodels)
+library (DescTools)
+library(dplyr)
+library(ggplot2)
+
+#Please note that for reproducibility purposes, ensure to use set.seed(3)
+#whenever generating random numbers. This will ensure that the same set of 
+#random numbers is generated each time, making your results consistent and reproducible.
+
+
+#Problem 1
+#part a:
+#Consider flipping three coins (or a single coin three times).
+#What is the probability of getting three heads? Find this probability using R through (R) simulation. You can check a similar example in the probability_assignment.
+
+
+set.seed (3)
+coinflipfunct <- function () {
+coin <- sample(c("H","T"), size = 3, replace = TRUE)
+head <- sum(coin=="H")
+head
+}
+
+
+n <- replicate(100000, coinflipfunct())
+n
+prob <- mean(n == 3)
+prob
+
+#.0125 is the probability
+```
+
+
+```{r}
+#b.) Find Probability distribution by simulation. That means you need to find
+#P(3 heads)
+#P(exactly two heads)
+#P(exactly one head)
+#P(No head)
+
+prob3heads <- mean(n == 3)
+prob3heads
+
+probexactly2<-mean(n==2)
+probexactly2
+
+probexactly1<-mean(n==1)
+probexactly1
+
+probofnone<-mean(n==0)
+probofnone
+```
+
+
+```{r}
+#c Let X is the number of H’s in three toss. Calculate its mean μ=E(X)=ΣxP˙(x)
+
+mean(n)
+```
+
+
+```{r}
+#Problem 2
+#An energy study in Gainesville, Florida found that in March 2015 household use of electricity had a mean of 673 kWh (kilowatt-hours) and a standard deviation of 556 kWh.
+
+
+#Part a:#Explain why we cannot assume that the household electricity use is normally distributed.
+
+#the higher voltage you have, the more electricity. there will not be a time the 
+#electricity will go down like a normal distribution chart.if anything, it would
+#immediately plummet to 0 because eventually it would be too much and whatever electricity would stop
+#but that is just hypothetical. Also, 1 standard is so high that once you hit two standard deviations
+#it would eventually get into the negatives after we subtract from the peak of the curve
+#it would probably be skewed to the left.
+```
+
+
+```{r}
+#Part b:Suppose we select a random sample of 100 households in Gainesville during March 2015 and calculate their average electricity use.
+#Explain why we can calculate the probability in part b when household electricity use is not normally distributed.
+ 
+
+#the central limit theorum states no matter the shape of the population data, 
+ #the sample shape mean with be normal if n ( in this case 100) is large
+```
+
+
+```{r}
+#Part c:What is the probability that the average electricity use is less than 600 kWh. Compute it by P(X¯<600)=P(Z<⋯and use table. Then compute it by pnorm()
+
+
+
+((600-673)/556)
+#p(x<600)=p(z<(600-673)/556)=p(z<-.13)
+# the negative z score table says its .4483
+
+pnorm(600, mean=673, sd=556, lower.tail = TRUE)
+#lower tail true because its left wing area
+#.447
+
+
+
+
+#Problem 3
+#An observational study was conducted to contrast cholesterol levels in rural and urban Guatemalan residents.
+#(M.D. Tejada et al., “The Blood Viscosity of Various Socioeconomic Groups in Guatemala.” 
+#American Journal of Clinical Nutrition (1964): 303-7.) The data from the study is recorded in the data set Cholesterol.csv. 
+#The observations measure the total serum cholesterol levels (mg/l) for each group of residents.
+setwd("/Users/abigailtata/Desktop")
+data <- read.csv("cholesterol.csv")
+data
+#Part a: Consider first the urban residents. Investigate graphically whether the total serum cholesterol levels 
+#for the urban residents can be assumed to be normally distributed. Justify your claim by providing supporting evidence.
+#Hint: You need to find the numerical summary, draw boxplot, qqplot, histogram, stem and leaf.
+
+
+urbanstats<-(data$Urban)
+urbanstats
+#summary
+summary(urbanstats)
+
+
+#boxplot
+boxplot(urbanstats, ylab="cholesterol")
+# it appears that there is a outlier above  the boxplot
+# the box plot doesn't look terribly uneven
+
+#qqplot
+qqnorm(urbanstats)
+qqline(urbanstats)
+#the qqplot seems to fit along the line. besides the outlier that is around 0 it doesnt look  bad
+
+#histogram
+hist(urbanstats)
+# looking at the histogram it does seem to look like a normal distribution with the mean being possibly around 230.
+
+stem(urbanstats)
+# the stem and leaf plot also seem to look normally distributed
+
+# looking at the numerous graphs and summary it is safe to say that the data 
+#happens to look  normally distributed. the histogram and the stem and leaf
+# plot happen to show off the normal distribution of the data the best
+```
+
+
+```{r}
+#Part b: A total serum cholesterol level over 200 mg/l is considered high. Test at α=0.05
+#, whether the mean total serum cholesterol level of urban residents is high? 
+
+
+# i
+#State the hypotheses that we want to test.
+
+#.HO the mean total serum cholesterol level of urban residents isnt higher than 200 mg/l
+#HA the mean total serum cholesterol levels of urban residents is higher than 200 mg/l
+```
+
+
+```{r}
+#ii.Find numerical summary of mean, median, standard deviation, minimum, maximum and number of observations for both Rural, and Urban. 
+#Put the result into a table. Calculate the value of the test statistic (for Urban). 
+#Show your computations. You need to calculate it once with the summary table (use formula x¯−μx¯s/n‾√) and then with R command t.test().
+library(printr)  
+
+
+
+Urban<-data$Urban
+Rural<-data$Rural
+
+urbanmean<-mean(Urban, trim=0, na.rm = TRUE)
+urbanmean
+ruralmean<-mean(Rural, trim=0, na.rm = TRUE)
+urbanSD<-round(sd(Urban,na.rm = TRUE), digits=2)
+
+ruralSD<-round(sd(Rural,na.rm = TRUE), digits=2)
+
+urbanstats<-summary(data.frame(data$Urban))
+urbanstats
+ruralstats<-summary(data.frame(data$Rural))
+ruralstats
+    data_frame_merge <- merge(ruralstats, urbanstats,
+                              by = 'row.names', na.rm = TRUE)   
+    df2 <- data_frame_merge[,-1]
+  df5 = data.frame(Var1.x = "", Var2.x= "SD rural",Freq.x=ruralSD, Var1.y ="", Var2.y= "SD urban", Freq.y= ruralSD)
+
+  df556 = rbind(df2,df5)
+colnames(df556) <- c(" ", "Rural", "#", "", "Urban", "#")
+df556
+
+urbancount <- length (Urban)
+ruralcount<-length(Rural)
+ruralcount
+urbancount
+
+manualteststatistic<-(urbanmean-200)/(urbanSD/sqrt(urbancount))
+manualteststatistic
+library(broom)
+
+t<-t.test(Urban, mu = 200, alternative = "greater", na.rm = TRUE)
+t
+tstat<- t$statistic
+tstat
+```
+
+
+```{r}
+#iii.Compute the p-value of the test. You need to it by using pt() and the t.test()
+
+
+t.test<-t.test(Urban, mu=200, alternative = "greater")
+t.test
+#.006
+
+
+pt(215.3409,43)
+```
+
+
+```{r}
+#iv. State the conclusion of the test. Interpret the conclusion in the context of the problem
+
+
+#the mean is higher than 200 mg/l. we reject the null because .006<.05
+```
+
+
+```{r}
+#Problem 4
+#Education and Future Income.
+#The data file ex0525 contains annual incomes in 2005 of a random sample of 
+#2,584 Americans who were selected for the National Longitudinal Survey of Youth
+#in 1979 and who had paying jobs in 2005. The data set also includes a code for
+#the number of years of education that each individual had completed 
+#by 2006: <12, 12, 13–15, 16, and >16. 
+#Note on the data: (see problem2.22 on page 55 of the textbook).
+
+
+#Part a:It is suggested that you perform a log-transformation of the variable 
+#“Income”. Look at the suggested plots, test of equality of variance among the
+#5 education groups, and tests of normality in the R-commands file for this 
+#homework. Why is this a good step when analyzing these data? Can you suggest
+#anything else that you may do here? (it’s OK if you don’t have any suggestion)
+
+library(Sleuth3)
+data("ex0525")
+head(ex0525)
+
+
+logincome<-log(ex0525$Income2005)
+logincome
+
+# looking at the income count
+ggplot(data = ex0525, aes(x = Income2005)) +
+  geom_histogram()
+ 
+ggplot(data = ex0525, aes(x = logincome)) +
+  geom_histogram()
+
+#showing education levels and income
+ggplot(data = ex0525, aes(x = Educ, y = logincome)) +
+  geom_boxplot()
+
+#equality of variance
+levene <- leveneTest (logincome ~ Educ, data = ex0525)
+levene
+
+
+# shapiro test never works for me but here is the code
+#shapiro<-shapiro.test(ex0525$logincome)
+#shapiro
+
+# its a good step to visualize the data and see how the data is made up
+#its also easier to see if the data is normally distributed or not
+```
+
+
+```{r}
+#Part b:How strong is the evidence that at least one of the five population
+#distributions (corresponding to the different years of education) is different
+#from the others? Justify your answer.
+
+anova1<-aov(logincome~Educ, data = ex0525)
+anova1
+
+
+#evidence of atleast 1 education population being different than the others can 
+#be showed in a p value
+#H0 evidence atleast one group of the 5 are different
+#Ha evidence no groups are different
+summary(anova1)
+
+#p value is 0 meaning that atleast one of the 5 groups are different
+```
+
+
+```{r}
+#Part c:By how many dollars or by what percent does the mean or median for
+#each of the last four categories exceed that of the next lowest category? 
+#To answer this question note that the
+#education categories are: <12, 12, 13–15, 16, and >16. Since the analysis 
+#is done using the transformed data so we will need the back transformation 
+#when reporting. Results should be presented in a table.
+
+ex0525 %>%
+  select(Educ, Income2005)%>%
+  group_by(Educ)%>%
+  summarize(meanIncome=mean(Income2005))%>%
+  mutate(difference=meanIncome-28301)
+```
+
+
+```{r}
+#Part d:Use the bonferroni procedure to compare every group to every other
+#group. Which pairs of means differ and by how many dollars 
+#(or by what percent)? (Use p-values and confidence intervals in your answer.)
+
+
+   model.fit <- aov(Income2005 ~ Educ, data = ex0525)
+   Bonf<-PostHocTest(model.fit, method = "bonferroni")  # Bonferroni
+   Bonf
+  
+   
+  #when looking at the p value.. we know the means differ when they re less than .005..
+  #we can look and see that <12-12 obviously dont differ and the p value is above .05.
+   
+   
+   # $Educ
+   #  diff         lwr.ci     upr.ci    pval    
+   # 13-15-12    8011.061   1826.834  14195.287 0.00279 ** 
+   #   16-12      33132.077  25908.179  40355.975 < 2e-16 ***
+   #  <12-12     -8563.448 -19801.326   2674.431 0.32380    
+   #  >16-12       39990.566  32548.896  47432.237 < 2e-16 ***
+   #   16-13-15   25121.016  17329.091  32912.941 < 2e-16 ***
+   #   <12-13-15 -16574.508 -28185.680  -4963.337 0.00062 ***
+   #   >16-13-15  31979.506  23985.267  39973.744 < 2e-16 ***
+   #   <12-16    -41695.524 -53892.218 -29498.830 < 2e-16 ***
+   #    >16-16     6858.490  -1964.656  15681.635 0.29062    
+   #  >16-<12      48554.014  36227.088  60880.940 < 2e-16 ***
+   
+   # the two means that differ the most are >16 and <12 which makes sense
+   # becahse its the least amount of education vs the most and the dollar amount 
+   #also is the same and supports that the more years of education the more 
+   # money you can make ex:
+   #>16-<12      diff =48554.014
+```
+
+
+```{r}
+#Part e:Use the Dunnett procedure to compare every other group to the group 
+#with 12 years of education. Which group means apparently differ from the mean
+#for those with 12 years of education and by how many dollars 
+#(or by what percent)? (Use p-values and confidence intervals in your answer.)\
+   
+
+  
+   DunnettTest(ex0525$Income2005, ex0525$Educ, control = "12")
+   
+  #pval of 12 and 12 obviously arent different and have a p value above .05
+   # this proves that using 12 and 12 arent different(ovbiously because theyre the 
+   #same) group 16-12 and >16 and 12 have the highest significance and lowest 
+   # p values which means they are the most different in means
+   #in the confidence interval the differences all fall within the lower and upper
+   
+   # the higest difference is .16 and 12 with a p value below .05 and 
+   #a difference in income of 39990.566
+```
+

@@ -1,0 +1,432 @@
+---
+title: "tata_statisticalmethods_FINAL"
+author: "Abby Tata"
+date: "2023-08-19"
+output: word_document
+---
+```{r}
+library(Sleuth3)
+library(tidyverse)
+library(car)
+library (mosaic)
+library (ggthemes)
+library (gmodels)
+library (DescTools)
+library(dplyr)
+library(ggplot2)
+
+
+#Question 1:
+ # Are any physiological indicators associated with schizophrenia? Early studies, based largely on postmortem
+#analysis, suggest that the sizes of certain areas of the brain may be different in persons afflicted with
+#schizophrenia than others. Confounding variables in these studies, however, clouded the issue considerably.
+#In a 1990 article, researchers reported the results of a study that controlled for genetic and socioeconomic
+#differences by examining 15 pairs of monozygotic twins, where one of the twins was schizophrenic and the
+#other was not. The twins were located through an intensive search throughout Canada and the United States.
+#The researchers used magnetic resonance imaging to measure the volumes (in cm$^3$) of several regions and
+#subregions inside the twins' brains. The figure below presents a dotplot based on the reported summary
+#statistics from one subregion, the left hippocampus. What is the magnitude of the difference in volumes of the
+#left hippocampus between unaffected and the affected individuals? Can the observed difference be attributed
+#to chance?
+
+case0202
+data(case0202)
+case0202$Difference <- case0202$Unaffected - case0202$Affected
+qplot(x = Difference, data = case0202, geom = "dotplot", binwidth = 0.05) +
+theme_bw() +
+ggtitle("Difference in volumes of left hippocampus in 15 sets of\nmonozygotic twins where one twin is
+affected by schizophrenia")
+
+
+
+
+
+#1. Create a vector containing the difference in the left-hippocampus in Affected and Unaffected twins.
+
+as_tibble(case0202)
+case0202$Difference <- case0202$Unaffected - case0202$Affected
+case0202
+```
+
+
+```{r}
+#2. Use the function t.test() to run a one-sample t-test against a null hypothesis of a mean difference of 0.
+
+ttest <- t.test(case0202$Difference, mu = 0)
+ttest
+```
+
+
+```{r}
+#3. What are the mean and standard deviations of the difference in
+#the left hippocampus between unaffected and affected twins? What is the sample size?
+
+favstats(~Difference, data = case0202)
+```
+
+
+```{r}
+#4. What is the t-statistic? Save it as the variable tstat.
+
+tstat<-ttest$statistic
+tstat
+```
+
+
+```{r}
+#5. What is the degrees of freedom? Save it as a variable degfr.
+
+degfr<-ttest$parameter
+degfr
+```
+
+
+```{r}
+#6. Use the pt() function to get the same p-value as in part 2.
+
+
+pt(tstat,degfr, lower.tail = FALSE)
+```
+
+
+```{r}
+###Question2
+#Marine biologists warn that the growing number of powerboats registered in Florida threatens the existence
+#of manatees. The data file Manatees2015.csv comes from the Florida Fish and Wildlife Conservation
+#Commission (myfwcm.com/research/manatee/) and the U.S. Coast Guard Office of Auxiliary and Boating
+#Safety (www.uscgboating.org/library/accident-statistics/Recreational-Boating-Statistics-2015.pdf).
+#You are to investigate the association between number of powerboats registered (in thousands) and
+#number of manatees deaths.
+
+Manatees<-read.csv("Manatees_2015.csv")
+Manatees
+#a). In this context, which one is the response variable?
+
+#explanatory variable is powerboat registrations
+#response variables is manatees killed
+```
+
+
+```{r}
+#b). Make a scatterplot of these data and describe the association you see. Paste your graph here.
+
+ggplot(Manatees, aes(x=Powerboat.Registrations.000s., y= Manatees.Killed)) + geom_point()
+```
+
+
+```{r}
+#c) Find the correlation between Boat Registration and Manatee Deaths. Comment on the number. Does it
+#agree with the scatterplot in part b.
+
+correlation<-cor(Manatees$Manatees.Killed,Manatees$Powerboat.Registrations.000s.)
+correlation
+# correlation is .9508
+```
+
+
+```{r}
+#d) If appropriate create a linear model of the association between Manatee Deaths and Powerboat
+#Registrations.
+
+lm(Manatees.Killed~Powerboat.Registrations.000s., data=Manatees)
+#Estimated Model:
+#manatees.Killed= -52.4149+ .1439(Powerboat.Registrations.000s.)
+```
+
+
+```{r}
+#e) Interpret the slope of your model and y intercept
+#Note: (unit of the slope: #deaths per 1000 boat registration)
+
+#.1439/1. change in y over change in x. 
+#for every 1(1000 boat registrations) you add .1439 to manatee deaths per year
+
+#the y intercept is when x=0.. this is where the point crosses
+#the y axis. that is the initial number and with every
+#1000 deaths( or we say 1) then we add .1439 to the -52.4149
+
+#we can obviously not have negative amount of manatees killed (this is when x=0),
+#but this is an equation that gives a reference and for the most part manatees killed is positive
+#therefore the x has to atleast surpass around 400 in order to have a functioning equation of
+#manatees killed. for example
+# -52.4149+ .1439*(365)=.10 ~0 manatee deaths
+#so around x=365(thousand) to get the manatees deaths to be in the positives and have the equation
+#actually be useful
+```
+
+
+```{r}
+#f). Interpret the value of 𝑹𝟐
+
+
+summary(lm(Manatees.Killed~Powerboat.Registrations.000s., data=Manatees)
+)
+##or
+correlation**2
+
+#we can explain 90% of the variation in the dependent variable
+```
+
+
+```{r}
+#question3
+
+#The plot below is a scatterplot of the corn yield versus rainfall in six U.S. corn-producing states (Iowa,
+#Nebraska, Illinois, Indiana, Missouri, and Ohio), recorded for each year from 1890 to 1927.
+
+
+data("ex0915")
+head(ex0915)
+
+
+#plot data 
+ggplot(data = ex0915, mapping = aes(x = Rainfall, y = Yield)) +
+  geom_point(color= "blue", size = 1.5) + 
+  xlab("Rainfall (inches)") +
+  ylab("Corn yield (bu/acre)") +
+  ggtitle("Yearly corm yield  vs. Rainfall (1890 -1927)")+
+  theme_bw()
+```
+
+
+```{r}
+#i)
+#Do you think a simple linear regression model is adequate here?
+
+#The linear regression model is not adequite. there doesnt seem to be a linear line and if anything
+#it looks curved at around 11 inches of rain.
+
+
+#How do you describe the relationship between rainfall and corn yields.
+
+#It seems that if there is around 12 inches of rainfall, there seems to be more corn yield. 
+#as stated in i. the chart increases then decreases. it looks that if there is
+#more than 12 inches of rain the trend of the corn yield seems to decrease.
+```
+
+
+```{r}
+#ii)
+#TRUE/FALSE
+#Increasing rainfall is associated with higher mean corn yields.
+
+#FALSE, UP UNTIL AROUND 12 INCHES
+
+
+#Increasing rainfall is associated with higher mean corn yields for rainfalls up
+#to 12 inches, increasing rainfall at higher levels is associated with no change
+#or perhaps a decrease in mean yield.
+
+#TRUE 
+
+#Looks like the rainfall effect does not depend on the rainfall level.
+
+#FALSE
+```
+
+
+```{r}
+#iii) .Fit model; Write down the estimated model and indicate the SE of parameters (below them, in
+#parentheses)
+#(2 decimal places is OK)
+ex0915$Rainfall2 <- (ex0915$Rainfall)**2
+ex0915
+
+fittedmodel<-lm(Yield~Rainfall+ Rainfall2, data=ex0915)
+fittedmodel
+summary(lm(Yield~Rainfall+ Rainfall2, data=ex0915))
+
+#Yield=-5.01+6.00(Rainfall)-0.23(Rainfall2)  
+
+
+
+
+#What is the estimate of σ?
+sigma(fittedmodel)
+#3.762707
+
+
+
+
+#What are the df associated with it?
+#35 degrees of freedom
+
+
+#Plot the residuals versus year. True/False
+
+fittedmodel<-lm(Yield~Rainfall+ Rainfall2, data=ex0915)
+fittedmodel
+residuals<-resid(fittedmodel)
+residuals
+ggplot(data = ex0915, mapping = aes(x = Year, y = residuals)) +
+  geom_point()
+
+
+
+##TRUE There is a trend; residuals tend to increase with increasing years.
+
+#TRUE This means that the actual yield is larger than what is predicted from the regression of yield on rainfall
+#for years
+
+#closer to 1927 and smaller than predicted for years closer to 1890.
+#TRUE For a given amount of rainfall, the yield per acre tended to be larger in the later years than in the
+#earlier years.
+#This might be due to improvements in technology.
+```
+
+
+```{r}
+#iv) The model incorporates curvature by having the effect of rainfall be different at different levels of
+#rainfall: (Simplify the expression below). Recall
+
+#   mu{corn|rain+1) - mu{corn|rain} = B2(2rain + 1 - rain^2)
+```
+
+
+```{r}
+#v)
+#Estimate the effect of a unit increase in
+#rainfall from 8 to 9 inches.
+
+-0.23 * (2 * 9 + 1 - 8^2)
+#10.35
+
+#Estimate the effect of a unit increase in
+#rainfall from 14 to 15 inches.
+
+-0.23 * (2 * 15 + 1 - 14^2)
+#37.95
+#NOTE: No need to interpret the individual coefficients in this example (difficult and unnecessary). The
+#statistical significance of the squared rainfall coefficient is that it highlights the inadequacy of the straight-line
+#regression model and suggests that increasing yield is associated with increasing rainfall only up to a point.
+```
+
+
+```{r}
+#vi) .Fit the model including year and report standard errors, in parentheses, below estimated
+#coefficients.
+
+
+yearmodel<- lm(Yield ~ Rainfall + Rainfall2 +Year, data = ex0915)
+yearmodel
+
+summary(yearmodel)
+
+#           Std. Error 
+#(Intercept)  98.24094   
+#Rainfall     1.88824   
+#Rainfall2    0.08207   
+# Year        0.05156
+
+
+
+#σ-hat =?
+
+summary(yearmodel)$sigma
+
+#> summary(yearmodel)$sigma
+#[1] 3.476785
+
+
+
+
+#How do the coefficients of rain and
+#rain2 differ from those in the
+#estimated model in (3)?
+
+fittedmodel<-lm(Yield~Rainfall+ Rainfall2, data=ex0915)
+fittedmodel
+ 
+#Coefficients:
+# (Intercept)   Rainfall    Rainfall2  
+#  -5.0147       6.0043      -0.2294 
+
+
+yearmodel<- lm(Yield ~ Rainfall + Rainfall2 +Year, data = ex0915)
+yearmodel
+#(Intercept)     Rainfall    Rainfall2         Year  
+#-263.3032       5.6704      -0.2155       0.1363  
+
+
+Rainfalldiff=6.00-5.67
+Rainfalldiff
+Rainfall2diff=-.23+.22
+Rainfall2diff
+
+#How does the estimate of σ differ?
+#(larger or smaller?)
+
+fittedsigma<-summary(fittedmodel)$sigma
+yearmodelsigma<-summary(yearmodel)$sigma
+fittedsigma-yearmodelsigma
+
+
+#Are the t-test for each of the
+#parameters above statistically
+#significant? Specify the not-
+#significant ones, if any.
+
+summary(yearmodel)
+#                 Pr(>|t|)   
+#(Intercept)     0.01126 * 
+# Rainfall       0.00499 **
+#  Rainfall2     0.01286 * 
+#  Year          0.01229 * 
+
+#all of them are significant but rainfall is the most significant with 2 ** 
+#whereas the others are only one *
+```
+
+
+```{r}
+#vii) Fit the model including year and report standard errors, in parentheses, below estimated
+#coefficients.
+
+vii <- lm(Yield ~ Rainfall + Rainfall2 + Year + Year: Rainfall, data = ex0915)
+vii
+
+#Coefficients:
+#  (Intercept)       Rainfall      Rainfall2      Year      Rainfall:Year  
+# -1.909e+03      1.588e+02     -1.862e-01      1.001e+00     -8.064e-02  
+
+
+summary(vii)
+
+
+
+#Coefficients:
+#                    Std. Error    
+#(Intercept)         4.862e+02  
+#  Rainfall          4.457e+01   
+#  Rainfall2         7.198e-02    
+#  Year              2.555e-01   
+#  Rainfall:Year     2.345e-02  
+
+
+
+
+#σ-hat =?
+summary(vii)$sigma
+#[1] 3.027922  
+  
+ # Is the coefficient of the interaction term significantly
+#different from zero? Explain your answer.
+
+summary(vii)
+#                   Pr(>|t|)
+#Rainfall:Year=   0.001599 ** 
+
+
+
+#What is the estimate of σ differ? (how many degrees of freedom?)
+
+
+summary(vii)
+#33 degrees of freedom
+
+
+#TRUE We can conclude that the effect of rainfall on yield is smaller for years closer to 1927
+#than for years closer to 1890.
+
+```
+

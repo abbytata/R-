@@ -1,0 +1,266 @@
+---
+title: "regressionfinal"
+author: "Abby Tata"
+date: "2023-08-13"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+
+
+
+   #(68.5, 45.2 ,91.3, 47.8 , 46.9  ,66.1  ,49.5,  52.0 , 48.9 , 38.4   ,67.9 ,72.8 ,88.4  ,42.9 ,52.5 , 85.7 , 41.3 , 51.7 , 89.6,  82.7 , 52.3) 
+XI<- c(68.5, 45.2, 91.3, 47.8,  46.9,  66.1,  49.5 , 52.0 , 48.9 , 38.4 , 67.9,  72.8 , 88.4,  42.9 , 52.5 , 85.7 , 41.3 , 51.7 ,  89.6 , 82.7,  52.3)  
+XI
+
+
+
+#(16.7, 16.8 , 18.2 , 16.3,  17.3 , 18.2 , 15.9,  17.2 , 16.6, 16.0 , 18.3, 17.1 , 17.4,  15.8 ,  17.8 , 18.4 , 16.5 , 16.3,   18.1 , 19.1 ,16.0)
+X2<- c(16.7, 16.8,  18.2 , 16.3 , 17.3,  18.2,  15.9,  17.2 , 16.6,  16.0, 18.3 , 17.1,  17.4 , 15.8,  17.8 , 18.4 , 16.5 , 16.3 ,  18.1 , 19.1 ,16.0)
+X2
+
+     #(174.4, 164.4, 244.2, 154.6, 181.6, 207.5, 152.8, 163.2, 145.4, 137.2, 241.9, 191.1, 232.0, 145.747, 161.1, 209.7, 146.4, 144.0, 232.6, 224.1, 166.5)
+ Y<- c(174.4, 164.4, 244.2, 154.6, 181.6, 207.5, 152.8, 163.2, 145.4, 137.2, 241.9, 191.1, 232.0, 145.747, 161.1, 209.7, 146.4, 144.0, 232.6, 224.1, 166.5)
+ Y
+
+
+data.frame(XI, X2, Y)-> dff1
+dff1
+
+
+ #1) Using the data table provided above,
+#a) generate a multiple regression model that predicts Y using the predictors Xl and X2.
+
+reg1<-lm(Y ~ XI+ X2 , dff1)
+reg1
+
+
+#Y=-129.438 +1.272(XI) + 13.631(X2)
+```
+
+
+```{r}
+#b) Run a summary on your model and indicate the adjusted r square value.
+#Also indicate if the predictors are significant at the .05 level. and , 
+#produce a table that will indicate the fitted values and the residuals.
+
+summary(reg1)
+#Adjusted R-squared:  0.8509
+
+#XI is highly significant, X2 is still significant but not highly. they are 
+#both significant at the .05 level but XI can be significant at the .001 as well. so more
+#significant than X2
+
+fitted<-fitted(lm(Y ~ XI+ X2 , dff1))
+
+
+residuals<-resid(lm(Y ~ XI+ X2 , dff1))
+
+
+data.frame(XI, X2, Y, fitted,residuals)-> dff2
+dff2
+```
+
+
+```{r}
+#c) Now use and show R coding to apply matrix methods to develop the same multiple regression model of part a) above.                                                                                                                                
+
+
+
+Xm <- matrix(c(1,68.5, 16.7, 
+               1,45.2, 16.8 ,
+               1, 91.3, 18.2 ,
+               1, 47.8, 16.3 ,
+               1, 46.9, 17.3 ,
+               1, 66.1, 18.2 ,
+               1, 49.5, 15.9 ,
+               1, 52.0, 17.2 ,
+               1, 48.9, 16.6 ,
+               1, 38.4, 16.0 ,
+               1, 67.9, 18.3 ,
+               1, 72.8, 17.1 ,
+               1, 88.4, 17.4 ,
+               1, 42.9, 15.8 ,
+               1, 52.5, 17.8 ,
+               1, 85.7, 18.4 ,
+               1, 41.3 ,16.5 ,
+               1, 51.7, 16.3  ,
+               1, 89.6, 18.1 ,
+               1, 82.7, 19.1 ,
+               1, 52.3, 16.0), ncol = 3, byrow = TRUE) 
+
+Xm
+
+
+#the method worked with y
+
+ Ym<- matrix(c(174.4 ,
+    164.4 ,
+   244.2 ,
+    154.6 ,
+  181.6 ,
+    207.5 ,
+    152.8, 
+   163.2 ,
+  145.4 ,
+   137.2, 
+    241.9 ,
+   191.1 ,
+   232.0 ,
+    145.747,
+   161.1 ,
+   209.7, 
+  146.4 ,
+  144.0, 
+    232.6 ,
+   224.1, 
+   166.5), ncol = 1, byrow = TRUE)  
+Ym
+
+interceptandslope<-solve(t(Xm)%*%Xm)%*%t(Xm)%*%Ym
+interceptandslope
+#            [,1]
+#[1,] -129.437749
+#[2,]    1.272211
+#[3,]   13.630988
+
+#Y=-129.438 +1.272(XI) + 13.631(X2)
+```
+
+
+```{r}
+#d) Find the fitted values and the residuals using R coding matrix methods. Again, confirm that the fitted values and the residuals are the same as your results for part a) above.
+
+
+matrixfitted<-Xm %*% interceptandslope   # these are the fitted values !!
+matrixfitted
+
+
+#residuals
+matrixresiduals<-Ym -  Xm %*% interceptandslope
+matrixresiduals
+
+data.frame(XI, X2, Y, fitted,matrixfitted, residuals,matrixresiduals)-> dff3
+dff3
+
+# the residual and fitted are the same when compared next to the other method
+```
+
+
+```{r}
+#2) Input the following code to produce the first 50 observational rows and the variables x, y, z, table, and price (>=17000). from the data set diamonds.
+library(tidyverse)
+diamonds%>%
+  select(x,y,z,table,depth,price)%>%
+  filter(price >= 17000)%>%
+  slice(1:50)-> diamonds1700
+diamonds1700
+
+#Use the R coding and the procedure indicated in class to produce the best model by
+#looking at the metrics mallo’s cp, Adjusted R square and the AIC, in order to predict a
+#price that is greater than or equal to 17000.
+#Indicate these values of the model that you have chosen and provide support for  the model that you have chosen.
+
+# high adjusted r2,  low cp,  and low AIC
+
+library(olsrr)
+library(tidyverse)
+library(dplyr)
+
+lin_mod_2 <- lm(price ~ ., data = diamonds1700) 
+lin_mod_2
+
+cor(diamonds1700)
+
+k <- ols_step_all_possible(lin_mod_2)
+k
+
+as_tibble(k)
+
+View(k)
+
+# when looking at the table k it looks like "table" would be the best model for predicting pricde >= 17000
+# the reason for this is because the predictor table had the highest Adjusted r2 the lowest cp and the lowest AIC which
+#these 3 indicatiors prove that the model with the said predictor is the best
+
+
+
+# if i were to continue with stepwise
+#intercept_only1 <- lm(price ~ 1, data=diamonds1700)
+#intercept_only1
+#define model with all predictors
+#all1 <- lm(price ~ ., data=diamonds1700)
+#all1
+#perform forward stepwise regression
+#forward1 <- step(intercept_only1, direction='forward', scope=formula(all1), trace=0)
+#forward1
+#view results of forward stepwise regression
+#forward1$anova
+#View(forward1$anova)
+#answer
+#Step Df Deviance Resid. Df Resid. Dev      AIC
+#      NA       NA        49   28550.58 319.3705
+```
+
+
+```{r}
+#3) The table below indicates if a player will be drafted into the NBA. For the binary factor variable draft, if a 1 is designated
+#a player will be drafted, and if a 0 is designated a player will not be drafted.
+#Using Logistic Regression R coding and procedures demonstrated in class, generate a Logistic Regression model and use
+#your model to determine the probability that a player will be drafted into the NBA from college if he averages 12 rebounds, 8 assists, and 10 points per game.
+
+tribble(~draft,  ~pts,   ~rebs, ~ast,
+ 0,12,3,6,
+ 1,13,4,4,
+ 0,13,4,6,
+ 1,12,9,9,
+ 1,14,4,5,
+ 0,14,4,4,
+ 0,17,2,2,
+ 1,17,6,5,
+ 1,21,5,7,
+ 0,21,9,3,
+ 1,24,11,11,
+ 0,24,4,5
+        ) -> q3
+q3
+
+library(ggplot2)
+glm(draft ~ pts + rebs + ast, family = "binomial",  data = q3) -> logisticq3
+logisticq3
+
+summary(logisticq3)
+
+
+ 
+#ln(P/(1 - P)=-3.6812-0.1128(pts)+0.3957(rebs)+0.6795(ast)
+#ln(P/(1 - P)=-3.6812-0.1128*(10)+0.3957*(12)+0.6795*(8)
+
+   #  ln(P/(1 - P) =  5.3752
+   
+   # e^ (ln(P/(1 - P)) = e^(5.3752)
+   z<-exp(5.3752)
+   z
+   # P/(1 - P)  = 215.9831
+   x<-(1+z)
+   
+   print(x, digits=10)
+   p<-z/x
+   p
+   #p=0.9953913
+   # ln(P/(1 - P) = -3.6812-0.1128*(10)+0.3957*(12)+0.6795*(8)  
+   # ln(P/(1 - P) = 5.3752
+   # e^(ln(P/(1 - P)) =e^(5.3752)
+   #     P/(1 - P) = 215.9831
+   # solve for P
+   #  P = 215.9831(1 - P)
+   #  P =  215.9831 - 215.9831P
+   #  216.9831P = 215.9831
+   #         P =  215.9831/216.9831P
+   #         P  =  0.99539
+ 
+   # we approximately have .99539
+```

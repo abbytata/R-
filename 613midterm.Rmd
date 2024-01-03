@@ -1,0 +1,292 @@
+---
+title: "Untitled"
+author: "abby tata"
+date: "3/25/2022"
+output: word_document
+---
+```{r}
+library(rvest)
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(stringr)
+
+```
+
+```{r setup, include=FALSE}
+#1 
+#a)  Is U an atomic vector or a list ?
+  U <- c("“Maine" , "Texas", "Delaware", "Oregon", "Utah", "Vermont", "Ohio")
+U
+####automic vector because all of them are character strings
+```
+
+```{r}
+#1b Use and show R code that will extract the elements  “Maine” and “Vermont”.
+U[c(1,6)] 
+
+
+```
+
+```{r}
+#1c Use and show R code that will extract all elements except “Texas”.
+U[c(1,3,4,5,6,7)]
+##or
+U[c(1,3:7)]
+###or
+U[-2]
+```
+
+```{r}
+#1d)  Use and show R code that will produce the length of U.
+length(U)
+```
+
+```{r}
+#2  
+V = list("Chicago", k = list( 2, 6, 18, 24), FALSE, 13, 1.3,  y = 1:10)
+
+#2a Is V an atomic vector or a list ?
+typeof(V)
+
+#V is a list because it is heterogeneous and has characters, integers, lists and logical entries
+```
+
+```{r}
+#2b   Use and show R code that will extract the 5th element of V.
+
+V[5]
+```
+```{r}
+#2c  If the vector V is a list, use and show R code to identify the type of each object in V.
+
+str(V)
+```
+
+```{r}
+#3
+tribble( ~John,    ~Raymond,    ~Martha,    ~Alice,   ~Juan,
+            86,      77,          81,         88,        90,                  79,      78,          85,         81,        78,
+            76,      75,          88,         94,        81,
+            84,      90,          71,         84,        89,
+            100,     80,          93,         85,        84,
+            90,      73,          70,         88,        93,
+) -> TestScores
+TestScores
+
+  #3a Use and show R code (a map function) to find the median for each column.
+
+map_dbl(TestScores, median)
+###or 
+median(TestScores$John)
+median(TestScores$Raymond)
+median(TestScores$Martha)
+median(TestScores$Alice)
+median(TestScores$Juan)
+
+```
+
+```{r}
+#3b) Use and show R code (a map function) to find the cube root of each column element.
+cuberoot_f<-function(x){
+    if(x < 0)
+    { - (-x)^(1/3)}
+    else
+    {x^(1/3)}
+    }
+
+tribble( ~John,    ~Raymond,    ~Martha,    ~Alice,   ~Juan,
+            86,      77,          81,         88,        90,                  
+            79,      78,          85,         81,        78,
+            76,      75,          88,         94,        81,
+            84,      90,          71,         84,        89,
+            100,     80,          93,         85,        84,
+            90,      73,          70,         88,        93,
+) -> TestScores
+
+map_df(TestScores,cuberoot_f)
+```
+
+```{r}
+
+#3b) Use and show R code (a map function) to find the cube root of each column element.
+
+
+
+
+map_df(TestScores,cuberoot_f)
+
+
+
+
+```
+
+
+```{r}
+#3c Use and show R code (a map function) to convert each column value to 0.
+tribble( ~John,    ~Raymond,    ~Martha,    ~Alice,   ~Juan,
+            86,      77,          81,         88,        90,                  79,      78,          85,         81,        78,
+            76,      75,          88,         94,        81,
+            84,      90,          71,         84,        89,
+            100,     80,          93,         85,        84,
+            90,      73,          70,         88,        93,
+) -> TestScores
+
+
+Testscores1<-TestScores %>%
+  map(~. * 0)
+as_tibble(Testscores1)
+```
+
+```{r}
+#4 
+z <- matrix( nrow = 3, ncol = 4)
+for (m in 1:3) {
+  for (n in 1:4) {
+    z[m, n] <- -1*(m + n)^2
+  }
+}
+print(z)
+```
+```{r}
+#5 Using the midwest data table, produce and show R code that will produce 20 observational rows of the table given below that only shows the first five observational rows. Use tidyverse/dplyr commands. Note that the state abbreviation WI has been changed to Wisconsin and Wisconsin is the only state listed.
+
+midwest %>%
+  select(state,county,area,percollege)%>%
+  mutate(state = recode(state, "WI" = "Wisconsin"))%>%
+  filter(state== "Wisconsin")->midwest2
+  
+
+head(midwest2, n=20)
+
+ 
+```
+
+```{r}
+midwest
+```
+
+
+```{r}
+#6 
+midwest<-copy(midwest)
+setDT(midwest)
+midwest[state == "WI", state := "Wisconsin" ]
+midwest[state == "Wisconsin" ,. (midwest$state,county,area, percollege)]->midwest1
+head(midwest1, n=20)
+
+
+```
+
+
+```{r}
+#7  Go to the link  https://www.imdb.com/list/ls096735829 and use Selector Gadget , as demonstrated in class to collect data specific to the movie names, the directors of the movies, the movie ratings, and the running times of the movies.  Your code should produce the final resulting table given below.   Hint:  (you may have to first create a data frame, and then convert the data frame to the tibble shown below.
+
+Link <- "https://www.imdb.com/list/ls096735829"
+page = read_html(Link)
+Movies2020  = page%>% html_nodes(".lister-item-header a")%>%
+  html_text()
+
+
+Link <- "https://www.imdb.com/list/ls096735829"
+page = read_html(Link)
+Directors2020  = page%>% html_nodes(".text-muted a:nth-child(1)")%>%
+  html_text()
+
+
+Link <- "https://www.imdb.com/list/ls096735829"
+page = read_html(Link)
+Rating2020  = page%>% html_nodes(".ipl-rating-star.small .ipl-rating-star__rating")%>%
+  html_text()
+
+
+Link <- "https://www.imdb.com/list/ls096735829"
+page = read_html(Link)
+Runningtime2020  = page%>% html_nodes(".runtime")%>%
+  html_text()
+
+
+
+MOVIESYEAR2020 = data.frame(Movies2020, Directors2020, Rating2020, Runningtime2020)
+
+as_tibble(MOVIESYEAR2020)->MOVIESYEAR2020ANSWER
+MOVIESYEAR2020ANSWER
+```
+
+
+```{r}
+#8 Test scores are normally distributed with a mean of 72 and a standard deviation of 3.5.
+#8a)  John’s score on this test is 76.  Find John’s  Z score.
+mean=72
+sd=3.5
+x=76
+
+Zscore<-(x-mean)/sd
+Zscore
+```
+
+
+```{r}
+#8b Now considering a standard normal distribution ( mean = 0 , sd =1)  Use and show R code to find the height of point on the normal curve with respect to John’s Z score on the horizontal axis.
+
+###i dont know what this is asking for me to do?
+
+###took the z score and 
+#height of standard normal distribution
+dnorm(Zscore, mean = 0, sd = 1)
+
+#The said points physical height from Z score
+pnorm(Zscore, mean = 0, sd = 1)->pNORM
+qnorm(pNORM, mean=72,sd=3.5)
+
+```
+
+```{r}
+#8c 
+
+ pnorm(76, mean = 72, sd = 3.5, lower.tail = FALSE)
+```
+
+```{r}
+#9  Use the following link to upload the internet page that offers a table that features information regarding automobile sales monthly.  https://www.goodcarbadcar.net/2019-us-vehicle-sales-figures-by-model/.   Use and show R code to web scrape the only table on the page.  A portion of the table is given below.
+wikiurl <- read_html("https://www.goodcarbadcar.net/2019-us-vehicle-sales-figures-by-model/ ")
+datatables1 <- wikiurl%>%
+  html_table(., fill = T)
+
+datatables1[[1]] -> dt
+dt
+
+
+
+```
+
+```{r}
+#10  Now use and show tidyverse/dplyr commands to improve on and correct your web scraped table produced in #8. The first five rows of the modified table is given below.  Note that the last column variable was created by mutating. Your coding should produce the remaining five observational rows.
+
+
+
+dt$Month<-str_replace(dt$Month, "," , "")
+dt$`Month LY`<- str_replace(dt$`Month LY`, "," , "")
+dt$Month <- as.double(dt$Month)
+dt$`Month LY` <- as.double(dt$`Month LY`)
+
+
+dt%>%
+  mutate(MonthlyDifference=(Month - `Month LY`))%>%
+  select(Model, Month, `Month LY`, MonthlyDifference)->dt1
+
+dt1
+```
+
+
+
+```{r}
+#11 Use and show R code that will only show observational rows for BMW vehicles.  This data table has 17 observational rows. The first five are shown below.
+
+ dt1 %>% 
+    filter(str_detect(Model, '^BMW'))
+```
+
+
+
+

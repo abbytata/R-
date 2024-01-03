@@ -1,0 +1,379 @@
+---
+title: "TATAMIDTERM REGRESSION"
+author: "Abby Tata"
+date: "2023-07-30"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(dplyr)
+library(broom)
+#part 1
+
+X<-c(1,3,6,11,15,19,22,27,31,35,42,47,48,54)
+X
+
+Y<-c(103,97,91,83,79,72,65,60,57,52,48,43,41,37)
+Y
+#a. Use and show R code to produce a scatter plot for the bivariate data given above. Indicate if the scatter
+#plot is showing a definitive positive or negative trend for the data. Use R code or offer a good
+#approximation for the correlation coefficient.
+plot(Y~X)
+#it looks like there is a definitive negative trend
+
+cor(X,Y)
+#-.986 is the correlation coefficient which means that there is a very strong correlation
+#between the two variables and its a strong negative trend
+```
+
+
+```{r}
+#b. Use and show R code to produce a linear model for the bivariate data shown above (use the lm method).
+#Interpret the slope of your model.
+
+lmequation<-lm(Y~X)
+lmequation
+#Y=97.48-1.21x
+
+# slope is -1.21/1
+#for every 1 (units?), you subtract by -1.21
+```
+
+
+```{r}
+#c. Use your model to predict the value of Y if X is 58.
+
+AnswertoC<-97.48-(1.21*58)
+AnswertoC
+#Y=27.3
+```
+
+
+```{r}
+#d. Should your model be used to predict a value of Y for an X value of 75? Justify your answer.
+
+thedata <- lm(Y~X)
+thedata
+
+AnswertoD<-97.48-(1.21*75)
+AnswertoD
+
+# just by looking at the equation and filling out the equation with x=75 it gives us 6.73.
+# if we were to extrapolate and look at the trends of the data and the data points it would show that :
+X<-c(1,3,6,11,15,19,22,27,31,35,42,47,48,54)
+X
+
+Y<-c(103,97,91,83,79,72,65,60,57,52,48,43,41,37)
+Y
+
+#when we do a number higher that 54 it will be lower than 37... when we look at the graph the graph goes in a 
+#negative direction and if we were to expand the graph to look closer the closer the x is to 75 the lower the number.
+#therefore, if we were to look at he model that we created, plug in 75 and get an answer of 6.72, that is on trend with what
+#we can assume as we look at the chart as well.yes, we could use our model to predict a value of y from x equalling 75
+
+
+#old code dont need to look at 
+#newdf <- data.frame(X = 75)
+#newdf
+
+#predict(object = thedata, newdata = newdf, interval = "prediction") %>% 
+  #cbind(newdf)
+```
+
+
+```{r}
+#e. Use and show R code to determine how much of the variation in Y is explained by your model.
+
+summary(lmequation)
+
+#r2 = .97
+#it tells us our moel is explaining 97%  between the dependent and independent
+```
+
+
+```{r}
+#f. Find a 95% confidence interval for the slope of your model.
+
+thedata <- lm(Y~X)
+thedata
+thedata1 <- tidy(thedata, conf.int = TRUE)
+select(thedata1, term, estimate, p.value, conf.low, conf.high)
+# LB -1.34        UB -1.08
+
+#We are 95% confident that the true population slope 
+# falls between -1.34 and -1.08
+```
+
+
+```{r}
+#g. Now find a prediction interval for the fixed value of 11, using r code as demonstrated in class.
+
+AnswertoG<-97.48-(1.21*11)
+AnswertoG
+
+
+
+newdf1 <- data.frame(X = 11)
+newdf1
+
+predict(object = thedata, newdata = newdf1, interval = "prediction") %>% 
+  cbind(newdf1)
+
+#prediction interval:
+ # lwr         upr 
+ #75.38924    92.95739
+```
+
+
+```{r}
+#h. Find the specific residual for the data point (57,31). Does the residual indicate that the observed value of
+#57 is above or below average. Explain why or why not.
+
+#observed
+#y=57
+#x=31
+
+#expected
+AnswertoH<-97.48-(1.21*31)
+AnswertoH
+
+#observed-expected
+57-59.97
+#-2.97
+# it is below average because it is a negative number
+```
+
+
+```{r}
+#i. Use and show R code to find all of the residuals of your model.
+
+resid(thedata) -> residuals
+residuals
+```
+
+
+```{r}
+#j. Use and show R code to produce the residual plot. (Residuals versus Fitted Values) Does the Residual
+#Plot suggest a good linear fit for your model? Explain why or why not.
+
+plot(fitted(thedata), residuals)
+
+
+#a residual plot is supposed to not have a pattern and be spread out. this plot seems to have a reverse bell shaped curve
+#it does not suggest a good linear model because it is not randomly dispersed
+```
+
+
+```{r}
+#k. Use and show R code that produces a boxplot of your residuals. Does your boxplot indicate the
+#existence of outliers.
+
+boxplot(residuals)
+
+
+# the boxplot does not show any dots outside of the boxplot which means theres no outliers
+```
+
+
+```{r}
+#l. Use and show R code to determine the normality status of your residuals.
+
+resid(thedata) -> residuals
+residuals
+
+qqnorm(residuals)
+```
+
+
+```{r}
+#m. Find the value that estimates the variance of the population linear model. (Use may use R coding)
+
+thedata <- lm(Y~X)
+thedata
+anova(thedata)
+
+#the sum of squares for the x is 5907.6 and for the residuals its 173.3
+```
+
+
+```{r}
+#n. Execute an F test to determine if a linear model from part 1b is appropriate.
+#Use the steps and procedure illustrated in class by making use of an
+#ANOVA table, the F value, and the F critical number. And of course,
+#indicate if the null hypothesis should be rejected.
+
+X<-c(1,3,6,11,15,19,22,27,31,35,42,47,48,54)
+X
+
+Y<-c(103,97,91,83,79,72,65,60,57,52,48,43,41,37)
+Y
+
+thedata <- lm(Y~X)
+thedata
+anova(thedata)
+#fvalue= 409.11
+#get fcritical
+qf(p=.05,df1=1,df2=12, lower.tail = FALSE)
+#  fcritical is 4.74
+
+#f  value is greater than f critical we will reject the null
+```
+
+
+```{r}
+#o. Now use matrix methods to find b0 and b1. Write the regression model and compare your results to the
+#answer for part b above.
+
+Y<-c(103,97,91,83,79,72,65,60,57,52,48,43,41,37)
+Y
+Ym<-matrix(c(103,
+             97,
+             91,
+             83,
+             79,
+             72,
+             65,
+             60,
+             57,
+             52,
+             48,
+             43,
+             41,
+             37), ncol = 1, byrow = TRUE)
+Ym
+
+
+X<-c(1,3,6,11,15,19,22,27,31,35,42,47,48,54)
+X
+
+Xm <- matrix(c(1,1,
+               1,3,
+               1,6,
+               1,11,
+               1,15,
+               1,19,
+               1,22,
+               1,27,
+               1,31,
+               1,35,
+               1,42,
+               1,47,
+               1,48,
+               1,54 ), ncol = 2, byrow = TRUE)
+Xm
+
+interceptandslope<-solve(t(Xm)%*%Xm)%*%t(Xm)%*%Ym
+interceptandslope
+#        [,1]
+#[1,] 97.48100
+#[2,] -1.20979
+#Y=97.48-1.21x
+
+# they are the same intercept and slope as part 1b
+```
+
+
+```{r}
+#p. Use matrix methods to find residuals of your model.
+
+Ym -  Xm %*% interceptandslope
+```
+
+
+```{r}
+#q. Use matrix methods to also find the fitted values for your model.
+
+Xm %*% interceptandslope   # these are the fitted values !!
+```
+
+
+```{r}
+#Part 2
+#a. True or false; matrix multiplication is commutative. In other words matrix A times matrix B is the same
+#as matrix B times matrix A
+
+
+
+# FALSE... the order in which you multiply matters
+```
+
+
+```{r}
+#b. Use the following two matrices ; 
+#A = 5 6.   B = 12 5
+#.  -1 3.       2 -2
+#to confirm the property (AB)-1= B-1A-1 (That is the inverse of matrix A multiplied by matrix B equals the
+ # inverse of matrix B multiplied by the inverse of matrix A,
+
+A=matrix(c(5,6,
+          -1,3), ncol = 2, byrow = TRUE)
+A
+
+B=matrix(c(12,5,
+            -2,-2), ncol = 2, byrow = TRUE)
+B
+
+
+#left of equals
+solve(A%*%B)
+
+#right of equals
+solve(B)%*%solve(A)
+```
+
+
+```{r}
+#  c. Use R coding and matrix methods to solve the following system of equations.
+                                       # 3x + y = 10
+                                       # -2x + 3y = 8
+
+A <- matrix(c(10,
+              8
+), ncol = 1, byrow = TRUE)
+A
+
+
+B <- matrix(c(3,1,
+              -2,3), ncol = 2, byrow =TRUE)
+B
+
+det(B)
+
+solve(B)
+
+solve(B)%*%A
+
+
+
+# x=2
+#y=4
+```
+
+
+```{r}
+# d. Use R coding and matrix methods to solve the following system of equations.
+ # 2x + y - 3z = -7
+#  x + 2y + z = 8
+# -3x - y + 2z = 1
+
+A <- matrix(c(-7,
+              8,
+              1
+), ncol = 1, byrow = TRUE)
+A
+
+
+B <- matrix(c(2,1,-3,
+              1,2,1,
+              -3,-1,2), ncol = 3, byrow =TRUE)
+B
+
+det(B)
+
+solve(B)
+
+solve(B)%*%A
+
+
+```
+
