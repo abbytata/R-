@@ -1,0 +1,145 @@
+---
+title: "Test 2"
+author: "abby tata"
+date: "11/12/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(tidyverse)
+library(stringr)
+library(dplyr)
+library(htmlwidgets)
+```
+
+```{r}
+#1
+relig_income
+nrow(relig_income) # it has 18 rows
+ncol(relig_income) # it has 11 columns
+dim(relig_income)
+
+```
+
+```{r}
+#2
+library(tidyr)
+pivot_longer(relig_income, cols = 2:11,  names_to = "income",
+             values_to = "frequency")-> relig_income2
+print(relig_income2, n=10)
+
+
+```
+
+```{r}
+#3
+relig_income2%>%
+  filter(income=="$100-150k")->relig_income3
+relig_income3
+```
+```{r}
+#4
+
+ #i dont know all frequency values as in total for the whole data set or for the recent question in number 3 where theres only 18 vs 180.
+
+#for the sum of frequency from question 3:
+sum(relig_income3$frequency)->sumfreqfromq3
+sumfreqfromq3
+
+#for the sum of frequency for all the frequency values in the whole data set:
+sum(relig_income2$frequency)->sumfreqofall180
+sumfreqofall180
+#or 
+
+
+```
+
+```{r}
+#5
+relig_income3%>%
+  select(religion,income,frequency)%>%
+  mutate(relig_income3,proportionoftotal=round((frequency/sumfreqfromq3), digits=4))->relig_income4
+
+relig_income4
+
+
+```
+```{r}
+#6
+
+
+mutate(relig_income4, income = recode(income, "$100-150k"= "$100k-$150k"))->relig_income5
+
+relig_income5
+
+```
+
+```{r}
+#7a
+superheroes <- tribble(
+~name,   ~alignment,  ~gender, ~publisher,
+"Magneto",  "bad",  "male",   "Marvel",
+"Storm",    "good", "female", "Marvel",
+"Mystique", "bad",  "female", "Marvel",
+"Batman",   "good", "male",   "DC",
+"Joker",    "bad",  "male",   "DC",
+"Catwoman", "bad",  "female", "DC",
+"Hellboy",  "good", "male",   "Dark Horse Comics"
+)
+superheroes
+
+publishers<- tribble(
+  ~publisher, ~yr_founded,
+  "DC",     1934,
+  "Marvel", 1939,
+  "Image",  1922
+)
+publishers
+```
+
+```{r}
+#7b
+superheroes %>%
+  count(name)%>%
+  filter(n>1)
+
+#The tibble shows 0x2 meaning that name is a key
+```
+
+```{r}
+#7c
+
+superheroes%>%
+  inner_join(publishers, by ="publisher")
+
+# There is some information missing like  Hellboy by Dark horse Comics  and the publisher image. The reason for this is because inner join finds what is equal or similar to. They match pairs of observations from the tables whenever their keys are equal. because both tables dont have both image and dark horse comics, they wont be included in the table
+```
+
+```{r}
+#8
+
+
+relig_income5%>%
+  filter(religion %in% c("Catholic", "Jewish", "Mainline Prot", "Muslim"))-> relig_income6
+
+relig_income6
+
+# This is what i thought would be the best, i have previous knowledge with %in%. If you would like me to do it another way i can
+
+```
+
+```{r}
+library(ggplot2)
+
+
+RI6<- ggplot(relig_income6, aes(x="", y = frequency, fill=religion))+
+  geom_bar(width = .5, stat = "identity") 
+
+
+
+piechart <- RI6 + coord_polar("y", start=0) + ggtitle("Frequency count for the 4 religions")
+piechart
+```
+
