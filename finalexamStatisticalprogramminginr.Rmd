@@ -1,0 +1,232 @@
+---
+title: "Untitled"
+author: "abby tata"
+date: "12/13/2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r}
+library(tidyverse) 
+library(stringr)           
+library(dplyr)
+library(ggplot2) 
+library(tidyr)              
+library(reshape2)
+library(readr) 
+library(forcats)
+```
+ 
+```{r}
+#1
+CollegeData<-read_csv("Collegedata.csv", na = "PrivacySuppressed")
+CollegeData
+view(CollegeData)
+```
+ 
+```{r}
+#2a
+
+ggplot(data=CollegeData) +
+  geom_point(mapping = aes(x = COSTT4_A, y=MN_EARN_WNE_P6), na.rm = TRUE)
+
+#this is the only thing that loads i have tried to get the lines on the right to go away 
+
+#just from the first plot that loads, its obvious that there is a positive correlation between the cost of the university attendance and the mean student earnings six years after graduation.
+```
+```{r}
+#2b
+
+ggplot(data=CollegeData) +
+  geom_point(mapping = aes(x = COSTT4_A, y=MN_EARN_WNE_P6), na.rm = TRUE)+
+ facet_wrap(~COSTT4_A) 
+
+#this is the plot that would not load. i am incapable of seeing what its supposed to look like to evaluate it
+```
+
+
+
+```{r}
+#3
+  ggplot(data=CollegeData, mapping = aes(x=AGE_ENTRY)) +
+  geom_histogram(na.rm = TRUE)  
+
+
+#previously geom_bar and geom_histogram were the same, now the histagram is for continuous data and geom_bar is for discrete. because this is discrete i will be using geom_bar
+```
+
+
+```{r}
+#4
+
+
+CollegeData%>%
+  select(AGE_ENTRY)%>%
+  mutate(AGE_ENTRY=AGE_ENTRY 0:100)%>%
+  arrange(desc(AGE_ENTRY))%>%
+  print(n=10)
+  
+
+#i cant figure this one out
+  
+
+  
+
+
+```
+```{r}
+#5
+americandf<-CollegeData %>% filter(grepl('American',INSTNM))
+
+americandf
+
+```
+```{r}
+
+#6
+
+sum(CollegeData$SAT_AVG >= 1000  & CollegeData$SAT_AVG<= 1600)
+#i couldnt figure what else to do so. nothing was working for me and it kept counting the NA. 
+```
+ 
+```{r}
+#7
+
+
+CollegeData%>%
+  filter(SAT_AVG <=1600)%>%
+  arrange(desc(SAT_AVG))%>%
+  print(n-10)
+
+#in order for this to work i had to filter the SAT average for anything below 1600(a perfect SAT score). if i didnt do this all of the NA would show and the operations to remove NA werent working
+  
+```
+ 
+```{r}
+#8
+gss_cat
+ggplot(data = gss_cat) +
+  geom_bar(mapping = aes(x = rincome))
+#The graph is difficult to interpret becuse theres a huge outlier of data that is on the far right. other than that the data is pretty symmetrial but the far data on the right makes things harder to work with.
+```
+```{r}
+
+#9
+tips
+#sex day and time are three categorical variables
+```
+```{r}
+
+#10
+tips%>%
+  count(day)
+
+
+```
+```{r}
+#11
+ggplot(data=tips, mapping = aes(x=total_bill)) +
+  geom_histogram(binwidth = 2)  
+
+
+```
+ 
+```{r}
+#12
+
+  
+ggplot(data = tips) +
+  geom_histogram(mapping= aes(x=total_bill)) +
+  facet_grid(sex~smoker)
+```
+```{r}
+#13
+stringr::words 
+library(tidyverse)
+library(stringr)
+```
+ 
+```{r}
+#13
+str_subset(words, "^....a....$")
+```
+```{r}
+#14
+writeLines("\\\\\"\"\\")
+```
+ 
+```{r}
+#15
+
+#this expression ^.*e$  means that it starts with any letter (which is the .) there can be 0 or more letters in the middle (representing *) and then the last letter has to be a e. words that work for this  could be pie because theres any first letter theres one middle letter(can be 0 and more in the middle letters) and then the last letter is an e. Other words that would match could be pipe be(doesnt need a middle letter) tangerine and even e would work becaise it starts with a letter, 0 letters in the middle and has to end with an e.. which works and when tested, it works
+ 
+```
+ 
+```{r}
+#16
+
+
+x3 <-  c("eight" , "four" , "ten", "two")
+x3
+numbers<- c("one", "two", "three" , "four" , "five" , 
+              "six" , "seven", "eight", "nine", "ten")
+numbers
+
+
+x2 <- factor(x3,  levels = numbers)
+
+
+sort(x2)
+```
+ 
+```{r}
+#17
+mpg2<-mpg%>%
+  select(manufacturer,cty)%>%
+  group_by(manufacturer) %>%
+  summarise(MeanCitymi = mean(cty))
+            
+mpg2
+```
+ 
+```{r}
+#18
+
+ggplot(data=mpg2) +
+  geom_point(mapping = aes(x = MeanCitymi, y=manufacturer, color=manufacturer)) 
+
+```
+```{r}
+#19
+mpg%>%
+  mutate(manufacturer=str_to_upper(manufacturer))%>%
+  select(manufacturer,model,year)%>% 
+  slice(15:20)%>%
+  print()
+```
+```{r}
+#20
+
+diamond2<-diamonds%>%
+  count(color)%>%
+  arrange(desc(n))%>%
+  rename(Frequency=n)%>%
+  rename(Color=color)
+
+diamond2
+
+```
+
+
+
+
+```{r}
+#21
+
+ggplot(data = diamond2) +
+  geom_bar(mapping = aes(x = Color, y = Frequency, fill = Color), stat = "identity")
+
+  
+```
+ 
