@@ -1,0 +1,194 @@
+---
+title: "Final 613"
+author: "abby tata"
+date: "5/4/2022"
+output: word_document
+---
+
+```{r}
+library(rvest)
+library(dplyr)
+library(tidyverse)
+library(repurrrsive)
+library(data.table)
+library(textdata)
+library(tidytext)
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+```
+
+```{r}
+#1
+
+
+Link <- "https://forecast.weather.gov/MapClick.php?CityName=Washington&state=DC&site=LWX&textField1=38.895&textField2=-77.0373&e=1#.YLPCyflKiUk"
+page = read_html(Link)
+Temperatures = page%>% html_nodes(".temp")%>%
+  html_text()
+Forcasts = page%>% html_nodes(".short-desc")%>%
+  html_text()
+DayNight = page%>% html_nodes(".period-name")%>%
+  html_text()
+
+Weather = data.frame(DayNight, Temperatures, Forcasts)
+
+
+
+as_tibble(Weather)
+```
+
+```{r}
+#2 a) Use data.table coding to read in the nyc data as was done in class. Assign the data table to the variable flights3 (The nycdata.csv is found on Canvas for week 7)
+flights3 <- fread("nycdata.csv")  
+flights3  
+```
+
+
+```{r}
+#2b) Use data.table coding to modify flights3 so that only the column variables origin, dest, and carrier appear.
+flights3[, list(origin, dest, carrier)]
+```
+
+
+```{r}
+#2c) Now use data.table coding that reflects an origin of JFK, a destination of SEA and a carrier of only Delta Airlines  DL.
+ 
+flights3[origin == "JFK" & dest == "SEA" & carrier == "DL"]
+```
+
+
+```{r}
+#2d) Use data.table coding to remove the variable air_time from the original flights3 data table.
+
+
+flights3[, !c("air_time")]
+```
+
+
+```{r}
+#2e) Use and show data.table coding to output the maximum and the minimum values for the variable distance.
+flights3[, .(maxdist = max(distance), mindist = min(distance))]
+```
+
+
+```{r}
+#2f) Use two or three sentences to explain the summary provided below and then use and show data.table coding to produce the table.
+flights3[, .(meandist = mean(distance)) , by = .(carrier)]
+#This code shows the mean distance by each carrier. In order to do this we need to have a grouping so we can seperate each mean by the carrier. If we didnt do this then it would be the overall distance between all carriers
+```
+
+```{r}
+#3 Provided below is the famous poem  “ Stopping by the Wood On a Snowy Evening”  by Robert Frost.Use the text mining sequence of steps and the R code modeled in class to 
+#a) create a tibble,
+
+text1 <- c(
+" Whose woods these are I think I know.",
+" His house is in the village though;",
+" He will not see me stopping here",
+" To watch his woods fill up with snow.",
+" My little horse must think it queer",
+" To stop without a farmhouse near,",
+" Between the woods and frozen lake",
+" The darkest evening of the year.",
+" He gives his harness bells a shake",
+" To ask if there is some mistake.",
+" The only other sound’s the sweep",
+" Of easy wind and downy flake.",
+" The woods are lovely, dark and deep,",
+" But I have promises to keep,",
+" And miles to go before I sleep,",
+" And miles to go before I sleep.")
+
+
+text_tibble <- tibble(line = 87:102, text1 = text1)
+text_tibble
+
+```
+
+```{r}
+#3b) find line locations of words,
+
+text_tibble %>%
+  unnest_tokens(word, text1)->linelocation
+linelocation
+```
+
+
+```{r}
+#3c) produce a word frequency table, and
+
+
+
+
+linelocation%>%
+  count(word, sort =TRUE) %>% 
+  filter(n >= 1)  ->freqtable
+freqtable
+
+
+
+```
+
+
+```{r}
+#3d) and create a bar graph data visualization plot that will also display word frequency trends.
+
+linelocation%>%
+  count(word, sort =TRUE) %>% 
+  filter(n >= 1) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col(fill = "blue", color = "red") +
+  labs(y = NULL)
+
+
+```
+
+```{r}
+#4 Now using the same body of text found in Problem 3, use and show R code to create a word cloud.  You can use the coding and methods that were illustrated in class or you can use alternate coding of your choice to create the word cloud.
+
+
+text1 <- Corpus(VectorSource(text1))
+
+
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+text1 <- tm_map(text1, toSpace, "/")
+text1 <- tm_map(text1, toSpace, "@")
+text1 <- tm_map(text1, toSpace, "\\|")
+
+
+text1 <- tm_map(text1, content_transformer(tolower))
+text1 <- tm_map(text1, removeNumbers)
+text1 <- tm_map(text1, removeWords, stopwords("english"))
+text1 <- tm_map(text1, removePunctuation)
+text1 <- tm_map(text1, stripWhitespace)
+
+
+dtm <- TermDocumentMatrix(text1)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+```
+
+```{r}
+#5 Use and show an R coding structure (found in your notes) that will produce the following matrix
+matrix1 = matrix(nrow=5, ncol=5) # create a 4 x 4 matrix(4 rows and 4 columns)
+for(i in 1:nrow(matrix1))        #// Assigned a variable 'i' for each row
+{
+  for(j in 1:ncol(matrix1))      #// Assigned a variable 'j' for each column
+  {
+    matrix1[i,j] = ((i+j)^3)          #// calculating product of two indeces
+  }
+}
+print(matrix1)
+```
+
